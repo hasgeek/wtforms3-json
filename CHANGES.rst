@@ -3,6 +3,11 @@ Changelog
 
 Here you can see the full list of changes between each WTForms-JSON release.
 
+0.4.0 (2021-12-15)
+^^^^^^^^^^^^^^^^^^
+
+- Support WTForms 3.0
+- Drop support for WTForms-Alchemy
 
 0.3.3 (2017-07-07)
 ^^^^^^^^^^^^^^^^^^
