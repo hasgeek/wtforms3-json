@@ -39,10 +39,10 @@ def test_select_multiple_field():
                 (1, 'Macbook Pro'),
                 (2, 'Macbook Air'),
                 (3, 'iPhone'),
-                (4, 'iPad')
+                (4, 'iPad'),
             ),
             validators=[validators.DataRequired()],
-            coerce=int
+            coerce=int,
         )
 
     for fixture in fixtures:
@@ -77,8 +77,8 @@ def test_custom_field():
                     self.data = None
                 else:
                     self.data = [
-                        item[0] for item in self.POWERS
-                        if str(item[0]) in valuelist]
+                        item[0] for item in self.POWERS if str(item[0]) in valuelist
+                    ]
                     if not len(self.data):
                         self.data = None
 
@@ -87,19 +87,17 @@ def test_custom_field():
 
     class SuperHeroForm(Form):
         name = StringField()
-        powers = SuperPowersField(
-            validators=[validators.DataRequired()]
-        )
+        powers = SuperPowersField(validators=[validators.DataRequired()])
 
     fixtures = [
         {'name': 'Juggernaut', 'powers': ['super strength'], '__result': True},
         {
             'name': 'Wolverine',
             'powers': ['stamina', 'agility', 'regeneration'],
-            '__result': True
+            '__result': True,
         },
         {'name': 'Beast', 'powers': ['agility'], '__result': True},
-        {'name': 'Rocket Rackoon', 'powers': [], '__result': False}
+        {'name': 'Rocket Rackoon', 'powers': [], '__result': False},
     ]
 
     for fixture in fixtures:

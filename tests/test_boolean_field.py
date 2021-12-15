@@ -1,5 +1,5 @@
-import pytest
 from wtforms import BooleanField, Form
+import pytest
 
 
 class TestBooleanField(object):

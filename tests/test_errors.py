@@ -8,4 +8,4 @@ class MyForm(Form):
 def test_errors():
     form = MyForm.from_json({'a': 'not an integer!'})
     form.validate()
-    assert form.errors == {'a': [u'Not a valid integer value']}
+    assert form.errors == {'a': [u'Not a valid integer value.']}

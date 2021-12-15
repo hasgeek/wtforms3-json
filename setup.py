@@ -6,10 +6,11 @@ Adds smart json support for WTForms. Useful for when using WTForms with RESTful
 APIs.
 """
 
-from setuptools import setup, Command
 import os
 import re
 import subprocess
+
+from setuptools import Command, setup
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,12 +38,7 @@ def get_version():
 
 
 extras_require = {
-    'test': [
-        'pytest>=2.2.3',
-        'WTForms-Alchemy>=0.8.6',
-        'flake8>=2.4.0',
-        'isort>=3.9.6'
-    ],
+    'test': ['pytest>=2.2.3', 'flake8>=2.4.0', 'isort>=3.9.6'],
 }
 
 
@@ -62,10 +58,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    install_requires=[
-        'WTForms>=1.0.5',
-        'six>=1.3.0'
-    ],
+    install_requires=['WTForms>=3.0', 'six>=1.3.0'],
     extras_require=extras_require,
     cmdclass={'test': PyTest},
     classifiers=[
@@ -85,6 +78,6 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )

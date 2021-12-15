@@ -1,0 +1,48 @@
+# Default tool config file. See also setup.cfg for tools that don't yet
+# support pyproject.toml.
+
+[tool.black]
+line-length = 88
+target_version = ['py37']
+skip-string-normalization = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | __pycache__
+  | buck-out
+  | build
+  | dist
+  | node_modules
+  | funnel/assets
+)/
+'''
+
+[tool.isort]
+profile = 'black'
+multi_line_output = 3
+include_trailing_comma = true
+line_length = 88
+order_by_type = true
+use_parentheses = true
+from_first = true
+# add_imports = 'from __future__ import annotations'
+known_future_library = ['__future__', 'six']
+known_first_party = ['wtforms_json', 'tests']
+default_section = 'THIRDPARTY'
+sections = ['FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER']
+
+[tool.pytest.ini_options]
+addopts = '--cov-report=term-missing'
+filterwarnings = ['ignore::DeprecationWarning', 'ignore::UserWarning']
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.7"

@@ -1,7 +1,6 @@
-import pytest
-
 from wtforms import Form, IntegerField, StringField
 from wtforms.validators import Optional
+import pytest
 
 
 class MyForm(Form):

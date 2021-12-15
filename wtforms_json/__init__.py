@@ -1,31 +1,24 @@
+import six
+
 import collections
 
-import six
 from wtforms import Form
+
 try:
-    from wtforms_sqlalchemy.fields import (
-        QuerySelectField,
-        QuerySelectMultipleField
-    )
+    from wtforms_sqlalchemy.fields import QuerySelectField, QuerySelectMultipleField
+
     HAS_SQLALCHEMY_SUPPORT = True
 except ImportError:
-    try:
-        from wtforms.ext.sqlalchemy.fields import (
-            QuerySelectField,
-            QuerySelectMultipleField
-        )
-        HAS_SQLALCHEMY_SUPPORT = True
-    except ImportError:
-        HAS_SQLALCHEMY_SUPPORT = False
+    HAS_SQLALCHEMY_SUPPORT = False
 from wtforms.fields import (
-    _unset_value,
     BooleanField,
     Field,
     FieldList,
     FileField,
     FormField,
-    StringField
+    StringField,
 )
+from wtforms.utils import unset_value
 from wtforms.validators import DataRequired, Optional
 
 __version__ = '0.3.3'
@@ -35,13 +28,7 @@ class InvalidData(Exception):
     pass
 
 
-def flatten_json(
-    form,
-    json,
-    parent_key='',
-    separator='-',
-    skip_unknown_keys=True
-):
+def flatten_json(form, json, parent_key='', separator='-', skip_unknown_keys=True):
     """Flattens given JSON dict to cope with WTForms dict structure.
 
     :form form: WTForms Form object
@@ -58,9 +45,7 @@ def flatten_json(
         {'a-b': 'c'}
     """
     if not isinstance(json, collections.Mapping):
-        raise InvalidData(
-            u'This function only accepts dict-like data structures.'
-        )
+        raise InvalidData(u'This function only accepts dict-like data structures.')
 
     items = []
     for key, value in json.items():
@@ -84,25 +69,14 @@ def flatten_json(
         if isinstance(value, collections.MutableMapping):
             if issubclass(field_class, FormField):
                 nested_form_class = unbound_field.bind(Form(), '').form_class
-                items.extend(
-                    flatten_json(nested_form_class, value, new_key)
-                    .items()
-                )
+                items.extend(flatten_json(nested_form_class, value, new_key).items())
             else:
                 items.append((new_key, value))
         elif isinstance(value, list):
             if issubclass(field_class, FieldList):
-                nested_unbound_field = unbound_field.bind(
-                    Form(),
-                    ''
-                ).unbound_field
+                nested_unbound_field = unbound_field.bind(Form(), '').unbound_field
                 items.extend(
-                    flatten_json_list(
-                        nested_unbound_field,
-                        value,
-                        new_key,
-                        separator
-                    )
+                    flatten_json_list(nested_unbound_field, value, new_key, separator)
                 )
             else:
                 items.append((new_key, value))
@@ -115,18 +89,15 @@ def flatten_json_list(field, json, parent_key='', separator='-'):
     items = []
     for i, item in enumerate(json):
         new_key = parent_key + separator + str(i)
-        if (
-            isinstance(item, dict) and
-            issubclass(getattr(field, 'field_class'), FormField)
+        if isinstance(item, dict) and issubclass(
+            getattr(field, 'field_class'), FormField
         ):
-            nested_class = field.field_class(
-                *field.args,
-                **field.kwargs
-            ).bind(Form(), '').form_class
-            items.extend(
-                flatten_json(nested_class, item, new_key)
-                .items()
+            nested_class = (
+                field.field_class(*field.args, **field.kwargs)
+                .bind(Form(), '')
+                .form_class
             )
+            items.extend(flatten_json(nested_class, item, new_key).items())
         else:
             items.append((new_key, item))
     return items
@@ -170,15 +141,15 @@ def monkey_patch_field_process(func):
     """
     Monkey patches Field.process method to better understand missing values.
     """
-    def process(self, formdata, data=_unset_value):
+
+    def process(self, formdata, data=unset_value, **kwargs):
         call_original_func = True
         if not isinstance(self, FormField):
 
             if formdata and self.name in formdata:
-                if (
-                    len(formdata.getlist(self.name)) == 1 and
-                    formdata.getlist(self.name) == [None]
-                ):
+                if len(formdata.getlist(self.name)) == 1 and formdata.getlist(
+                    self.name
+                ) == [None]:
                     call_original_func = False
                     self.data = None
                 self.is_missing = not bool(formdata.getlist(self.name))
@@ -186,12 +157,13 @@ def monkey_patch_field_process(func):
                 self.is_missing = True
 
         if call_original_func:
-            func(self, formdata, data=data)
+            func(self, formdata, data=data, **kwargs)
 
         if (
-            formdata and self.name in formdata and
-            formdata.getlist(self.name) == [None] and
-            isinstance(self, FormField)
+            formdata
+            and self.name in formdata
+            and formdata.getlist(self.name) == [None]
+            and isinstance(self, FormField)
         ):
             self.form._is_missing = False
             self.form._patch_data = None
@@ -228,17 +200,19 @@ def from_json(
     data=None,
     meta=None,
     skip_unknown_keys=True,
-    **kwargs
+    **kwargs,
 ):
     form = cls(
         formdata=MultiDict(
             flatten_json(cls, formdata, skip_unknown_keys=skip_unknown_keys)
-        ) if formdata else None,
+        )
+        if formdata
+        else None,
         obj=obj,
         prefix=prefix,
         data=data,
         meta=meta,
-        **kwargs
+        **kwargs,
     )
     return form
 
@@ -267,6 +241,7 @@ def monkey_patch_process_formdata(func):
         valuelist = list(map(six.text_type, valuelist))
 
         return func(self, valuelist)
+
     return process_formdata
 
 
@@ -280,10 +255,9 @@ def init():
         QuerySelectField.process_formdata = monkey_patch_process_formdata(
             QuerySelectField.process_formdata
         )
-        QuerySelectMultipleField.process_formdata = \
-            monkey_patch_process_formdata(
-                QuerySelectMultipleField.process_formdata
-            )
+        QuerySelectMultipleField.process_formdata = monkey_patch_process_formdata(
+            QuerySelectMultipleField.process_formdata
+        )
     Field.process = monkey_patch_field_process(Field.process)
     FormField.process = monkey_patch_field_process(FormField.process)
     BooleanField.false_values = BooleanField.false_values + (False,)

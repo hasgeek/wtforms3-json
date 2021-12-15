@@ -1,8 +1,11 @@
 import six  # noqa
+
 from pytest import mark
 from wtforms import Form, IntegerField, SelectMultipleField, StringField
+
 try:
-    from wtforms.ext.sqlalchemy.fields import QuerySelectField
+    from wtforms_sqlalchemy.fields import QuerySelectField
+
     HAS_SQLALCHEMY_SUPPORT = False
 except ImportError:
     HAS_SQLALCHEMY_SUPPORT = False
@@ -10,8 +13,8 @@ from wtforms.validators import IPAddress
 
 sa = None
 try:
-    import sqlalchemy as sa
     from sqlalchemy.ext.declarative import declarative_base
+    import sqlalchemy as sa
 except ImportError:
     pass
 
@@ -43,7 +46,7 @@ class FooForm(Form):
             (2, 'b'),
             (3, 'c'),
         ),
-        coerce=int
+        coerce=int,
     )
 
 
@@ -72,7 +75,7 @@ class TestQuerySelectField(object):
             team = QuerySelectField(
                 query_factory=lambda: [
                     self.Team(id=1, name='Manchester United'),
-                    self.Team(id=2, name='FC Barcelona')
+                    self.Team(id=2, name='FC Barcelona'),
                 ]
             )
 
